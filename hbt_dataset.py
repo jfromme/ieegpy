@@ -3,6 +3,7 @@ import xml.etree.ElementTree as ET
 import datetime
 import requests
 import numpy as np
+import hbt_auth as auth
 
 
 class Dataset:
@@ -18,7 +19,7 @@ class Dataset:
         
         for dt in details.findall('detail'):
             name = dt.findall('name')[0].text
-            self.tsd.append(name)
+            self.chLabels.append(name)
             self.tsArray.append(dt)
              
              
@@ -68,12 +69,11 @@ class Dataset:
         
         # collect data in numpy array
         d = np.fromstring(r.content, dtype='>i4') 
-        h = r.headers
         
         # Check all channels are the same length
         samplePerRow = [int(numeric_string) for numeric_string in r.headers['samples-per-row'].split(',')]
         if not all_same(samplePerRow):
-            raise connectionError('Not all channels in response have equal length')
+            raise auth.ConnectionError('Not all channels in response have equal length')
             
         convF = np.array([float(numeric_string) for numeric_string in r.headers['voltage-conversion-factors-mv'].split(',')])
     
